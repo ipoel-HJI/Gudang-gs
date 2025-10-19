@@ -189,6 +189,7 @@ ul{list-style:none;padding:0;margin:0}
 .item-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px}
 .muted{color:var(--muted);font-size:0.9rem}
 .footer{text-align:center;padding:12px;color:var(--muted)}
+
 @media(max-width:880px){
   .sidebar{
     display:block; /* biar tetap tampil */
@@ -372,4 +373,5 @@ ul{list-style:none;padding:0;margin:0}
 .category-content.hidden {
   display: none;
 }
+
 
