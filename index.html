@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aplikasi Gudang - LocalStorage</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"> <h1>GUDANG KANTOR</h1></div>
+      <div class="role-switch">
+        <label>Masuk sebagai</label>
+        <select id="roleSelect">
+          <option value="user" selected>User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="container">
+      <aside class="sidebar" id="sidebar">
+        <nav>
+          <button data-view="inventory" class="active">Stok & Kategori</button>
+          <button data-view="take">Ambil Barang (User)</button>
+          <button data-view="request">Request Barang</button>
+          <button data-view="incoming" class="admin-only">Laporan Barang Masuk</button>
+          <button data-view="outgoing" class="admin-only">Laporan Pengambilan Barang</button>
+          <button data-view="adminPanel" class="admin-only">Panel Admin</button>
+          <button id="resetBtn" class="admin-only">Reset Data</button>
+        </nav>
+      </aside>
+
+      <section class="content" id="content">
+        <!-- views injected here -->
+      </section>
+    </main>
+
+    <footer class="footer"> Aplikasi Gudang </footer>
+  </div> 
+  
+  <!-- 🧾 Modal Login Admin -->
+<div id="adminLoginModal" class="modal">
+  <div class="modal-content">
+    <h3>Login Admin</h3>
+    <form id="adminLoginForm">
+      <label>
+        Username
+        <input type="text" id="adminUsername" required>
+      </label>
+      <label>
+        Password
+        <input type="password" id="adminPassword" required>
+      </label>
+      <div class="actions">
+        <button type="submit">Login</button>
+        <button type="button" id="cancelLoginBtn">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <template id="tpl-inventory">
+    <div class="view">
+      <div class="view-head">
+        <h2>Stok Barang</h2>
+        <div>
+          <input id="searchItem" placeholder="Cari nama barang..." />
+        </div>
+      </div>
+      <div id="categoriesList" class="categories"></div>
+    </div>
+  </template>
+
+  <template id="tpl-take">
+    <div class="view">
+      <h2>Form Pengambilan Barang</h2>
+      <form id="formTake">
+        <div class="grid">
+          <label>Tanggal Pengambilan<input type="date" name="date" required /></label>
+          <label>Nama<input name="name" required /></label>
+          <label>Instansi
+            <select name="instansi" required>
+              <option value="HJI Karyawan">HJI Karyawan</option>
+              <option value="HJI Driver">HJI Driver</option>
+              <option value="HJI Maintenance">HJI Maintenance</option>
+              <option value="HJI OB">HJI OB</option>
+              <option value="HJI Dapur">HJI Dapur</option>
+              <option value="HJI Kantin">HJI Kantin</option>
+              <option value="HJI Loundry">HJI Loundry</option>
+              <option value="HJU">HJU</option>
+              <option value="HRT">HRT</option>
+              <option value="Instansi Lainnya">Instansi Lainnya (Input Manual)</option>
+            </select>
+          </label>
+          <label>Instansi Manual (opsional)<input name="instansi_manual" placeholder="Jika memilih Instansi Lainnya" /></label>
+          <label>Kategori
+            <select name="category" id="takeCategory" required></select>
+          </label>
+          <label>Nama Barang
+            <select name="itemName" id="takeItem" required></select>
+          </label>
+          <label>Jumlah<input type="number" name="qty" min="1" value="1" required /></label>
+        </div>
+        <div class="actions">
+          <button type="submit">Kirim</button>
+        </div>
+      </form>
+
+      <h3> Pengambilan Barang (Status: Menunggu konfirmasi)</h3>
+      <div id="pendingList"></div>
+    </div>
+  </template>
+
+  <template id="tpl-request">
+    <div class="view">
+      <h2>Request Barang (jika tidak tersedia)</h2>
+      <form id="formRequest">
+        <div class="grid">
+          <label>Instansi<input name="instansi" required /></label>
+          <label>Kategori
+            <select name="category" id="reqCategory" required></select>
+          </label>
+          <label>Nama Barang<input name="itemName" required /></label>
+          <label>Jumlah<input type="number" name="qty" min="1" value="1" required /></label>
+          <label>Tanggal Perlu<input type="date" name="neededDate" /></label>
+          <label>Urgent? <input type="checkbox" name="urgent" /></label>
+        </div>
+        <div class="actions"><button type="submit">Kirim Request</button></div>
+      </form>
+
+      <h3>Daftar Request</h3>
+      <div id="requestList"></div>
+    </div>
+  </template>
+
+  <template id="tpl-incoming">
+    <div class="view">
+	
+      <h2>form Barang Masuk</h2>
+	  <label>Kategori
+          <select name="category" id="incCategory" required></select>
+        </label><label>Nama Barang<input name="itemName" required /></label>
+        <label>Jumlah<input type="number" name="qty" min="1" value="1" required /></label>
+        <label>Tanggal<input type="date" name="date" required /></label>
+        <button type="submit">Tambah Barang Masuk</button>
+		<h2>Laporan Barang Masuk</h2><div class="actions">
+	<button type="button" id="printIncomingBtn">Cetak PDF</button>
+		<button type="button" id="exportIncomingBtn">Ekspor ke Excel</button>
+	</div>
+        
+      <form id="formIncoming" class="inline-form">
+	<div id="incomingList"></div>
+
+        
+      </form>
+
+      <div id="incomingList"></div>
+    </div>
+  </template>
+
+  <template id="tpl-outgoing">
+	<div id="outgoingList"></div>
+    <div class="view">
+      <h2>Laporan Pengambilan (Disetujui)</h2>
+	    <div class="actions">
+			<button type="button" id="printOutgoingBtn">Cetak PDF</button>
+			<button type="button" id="exportOutgoingBtn">Ekspor ke Excel</button>
+		</div>
+      <div id="outgoingList"></div>
+    </div>
+  </template>
+
+  <template id="tpl-admin">
+    <div class="view">
+      <h1>PANEL ADMIN</h1>
+      <div class="admin-grid">
+	          <div class="card">
+          <h2>Pengambilan Barang & Request Barang Dari User</h2>
+          <div id="adminRequests"></div>
+        </div>
+        <div class="card">
+          <h3>Kategori</h3>
+          <form id="formCategory" class="inline-form">
+            <input name="catName" placeholder="Nama Kategori" required />
+            <button type="submit">Tambah</button>
+          </form>
+          <ul id="catList"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Tambah Barang</h3>
+          <form id="formItem" class="inline-form">
+            <select name="category" id="itemCategory" required></select>
+            <input name="name" placeholder="Nama Barang" required />
+            <input type="number" name="stock" min="0" value="0" required />
+            <button type="submit">Tambah / Update</button>
+          </form>
+          <ul id="itemList"></ul>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+  
+</body>
+</html>
